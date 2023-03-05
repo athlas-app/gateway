@@ -1,9 +1,12 @@
-name: Athlas Play - CI Merge
+name: Athlas Gateway - CI Merge
 
 on:
   push:
     branches:
       - main
+
+env:
+  GOPRIVATE: "github.com/athlas-app"
 
 jobs:
   build:
