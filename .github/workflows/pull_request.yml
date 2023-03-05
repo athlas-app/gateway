@@ -15,10 +15,16 @@ concurrency:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    # Prevent the gotool from looking up the private repositories on the sum
+    # server.
     env:
-      GOPRIVATE: github.com/athlas-app/*
-      PAT_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      GONOSUMDB: "*github.com/athlas-app/*"
     steps:
+      # Enforce that GitHub dependencies are fetched via SSH
+      - name: Enforce SSH
+        run: |
+          echo "[url \"ssh://git@github.com/\"]" > ~/.gitconfig
+          echo "        insteadOf = https://github.com/" >> ~/.gitconfig
       - uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -28,6 +34,5 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.19"
-      - run: git config --global url.https://$PAT_TOKEN@github.com/.insteadOf https://github.com/
       - run: go build
       - run: go test
