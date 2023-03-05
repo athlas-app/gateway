@@ -1,2 +1,2 @@
 run:
-	doppler rnu -- go run main.go
+	doppler run -- go run main.go

@@ -33,6 +33,10 @@ func main() {
 		mux.ServeHTTP(w, r)
 	})
 
-	log.Default().Println("Starting gRPC gateway...")
-	http.ListenAndServe(":8000", r)
+    port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Default().Println("Starting gRPC gateway on port " + port)
+	http.ListenAndServe(":" + port, r)
 }
