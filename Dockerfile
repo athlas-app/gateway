@@ -1,3 +1,5 @@
+syntax=docker/dockerfile:experimental
+
 FROM golang:alpine
 
 RUN apk --update add ca-certificates git openssh-client
