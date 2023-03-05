@@ -23,7 +23,7 @@ RUN mkdir /root/.ssh/ && \
 # Set up gitconfig
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
-RUN --mount=type=ssh go mod download
+RUN go mod download
 
 RUN go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
 
