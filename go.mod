@@ -1,5 +1,3 @@
-GOPRIVATE=github.com/athlas-app/*
-
 module athlas/gateway
 
 go 1.19
