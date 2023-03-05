@@ -1,0 +1,38 @@
+name: Athlas Gateway - Pull Request
+
+run-name: Pull Request | test
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    # Prevent the gotool from looking up the private repositories on the sum
+    # server.
+    env:
+      GONOSUMDB: "*github.com/athlas-app/*"
+    steps:
+      # Enforce that GitHub dependencies are fetched via SSH
+      - name: Enforce SSH
+        run: |
+          echo "[url \"ssh://git@github.com/\"]" > ~/.gitconfig
+          echo "        insteadOf = https://github.com/" >> ~/.gitconfig
+      - uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.19"
+      - run: go build
+      - run: go test
