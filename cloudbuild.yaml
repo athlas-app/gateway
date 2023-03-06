@@ -51,11 +51,11 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
 substitutions:
+  _SERVICE_NAME: gateway
   _DEPLOY_REGION: us-east4
-  _TRIGGER_ID: 046b729a-763d-4b09-a985-38fb04637fa1
+  _TRIGGER_ID: 1d4f4fd9-56c9-4f7d-b416-f7814c66006c
   _GCR_HOSTNAME: us.gcr.io
   _PLATFORM: managed
-  _SERVICE_NAME: gateway
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
