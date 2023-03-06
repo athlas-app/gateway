@@ -1,17 +1,29 @@
 steps:
+
+steps:
+  # Access the id_github file from Secret Manager, and setup SSH
+  - name: gcr.io/cloud-builders/git
+    secretEnv: ['SSH_PRIVATE_KEY']
+    entrypoint: 'bash'
+    args:
+    - -c
+    - |
+      echo "$$SSH_PRIVATE_KEY" >> /root/.ssh/id_rsa
+      chmod 400 /root/.ssh/id_rsa
+      cp .github/known_hosts.github /root/.ssh/known_hosts
+    volumes:
+    - name: 'ssh'
+      path: /root/.ssh
   - name: gcr.io/cloud-builders/docker
     args:
       - build
       - '--no-cache'
-      - '--build-arg'
-      - '$$SSH_PRIVATE_KEY'
       - '-t'
       - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
       - .
       - '-f'
       - Dockerfile
     id: Build
-    secretEnv: ['SSH_PRIVATE_KEY']
   - name: gcr.io/cloud-builders/docker
     args:
       - push
