@@ -3,7 +3,7 @@ Gateway server to interface between mobile apps and microservices
 
 ## Getting Started
 
-Something
+Something something
 
 ## TODO:
 
