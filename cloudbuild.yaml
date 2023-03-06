@@ -7,7 +7,7 @@ steps:
     args:
       - '-c'
       - |
-        git config --global url."https://github.com/".insteadOf git://github.com/
+        git config --global url."git@github.com/".insteadOf "https://github.com/"
         git config --global credential.helper store
   - name: gcr.io/cloud-builders/docker
     secretEnv: ['GITHUB_PAT']
