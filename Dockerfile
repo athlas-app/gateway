@@ -15,7 +15,7 @@ WORKDIR /app
 COPY . .
 
 # Set up gitconfig
-RUN echo "machine github.com login athlas-app password ${GITHUB_TOKEN}" > /root/.netrc
+RUN echo "machine github.com login oauth_token password ${GITHUB_TOKEN}" > /root/.netrc
 
 RUN go mod download
 
