@@ -2,6 +2,8 @@ FROM golang:alpine
 
 RUN apk --update add ca-certificates git openssh-client
 
+ARG GITHUB_TOKEN
+
 ENV CGO_ENABLED=0 GOOS=linux GOPRIVATE=github.com/athlas-app/*
 
 # Install Doppler CLI
@@ -13,7 +15,7 @@ WORKDIR /app
 COPY . .
 
 # Set up gitconfig
-RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
+RUN echo "machine github.com login gabtimotei@gmail.com password ${GITHUB_TOKEN}" > ~/.netrc
 
 RUN go mod download
 
