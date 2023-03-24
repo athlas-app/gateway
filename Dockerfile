@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine
+FROM golang:1.19-alpine as builder
 
 RUN apk --update add ca-certificates git openssh-client
 
@@ -6,6 +6,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 ENV CGO_ENABLED=0 GOOS=linux GOPRIVATE=github.com/athlas-app/*
+
+# Create the /root/.ssh directory
+RUN mkdir -p /root/.ssh
 
 # Copy the SSH key with access to private repositories
 ARG SSH_PRIVATE_KEY
@@ -41,4 +44,4 @@ EXPOSE 8080
 
 # Run the server binary
 ENTRYPOINT ["doppler", "run", "--"]
-CMD ["/app/main"]
+CMD ["/server"]
