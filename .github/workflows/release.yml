@@ -8,20 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - environment: DEV
-            project_id: DEV_PROJECT_ID
-            gcp_sa_key: DEV_GCP_SA_KEY
-          - environment: PROD
-            project_id: PROD_PROJECT_ID
-            gcp_sa_key: PROD_GCP_SA_KEY
-    env:
-      ENV_NAME: ${{ matrix.environment }}
-      PROJECT_ID: ${{ secrets[matrix.project_id] }}
-      GCP_SA_KEY: ${{ secrets[matrix.gcp_sa_key] }}
-    environment: ${{ matrix.env.name }}
     steps:
       - uses: shimataro/ssh-key-action@v2
         with:
@@ -44,32 +30,17 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-
-      # Build and deploy to dev
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '$GCP_SA_KEY'
-
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-            project_id: $PROJECT_ID
-
-      - name: Build and push Docker image
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        run: |
-          gcloud auth configure-docker
-          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/$PROJECT_ID/gateway:$ENV_NAME
-          docker push gcr.io/$PROJECT_ID/gateway-$ENV_NAME
-
-      - name: Deploy to Google Cloud Run
-        run: |
-          gcloud run deploy gateway-$ENV_NAME \
-            --platform managed \
-            --region us-central1 \
-            --image gcr.io/$PROJECT_ID/gateway:$ENV_NAME \
-            --allow-unauthenticated \
-            --port 8080 \
-            --set-env-vars GRPC_GO_LOG_SEVERITY_LEVEL=INFO
+  deploy-dev:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      ENV: DEV
+    secrets:
+      PROJECT_ID: ${{ secrets.DEV_PROJECT_ID }}
+      GCP_SA_KEY: ${{ secrets.DEV_GCP_SA_KEY }}
+  deploy-prod:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      ENV: PROD
+    secrets:
+      PROJECT_ID: ${{ secrets.PROD_PROJECT_ID }}
+      GCP_SA_KEY: ${{ secrets.PROD_GCP_SA_KEY }}
