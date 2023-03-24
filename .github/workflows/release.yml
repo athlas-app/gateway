@@ -34,7 +34,7 @@ jobs:
     needs: build
     uses: ./.github/workflows/deploy.yml
     with:
-      ENV: DEV
+      ENV_NAME: DEV
     secrets:
       PROJECT_ID: ${{ secrets.DEV_PROJECT_ID }}
       GCP_SA_KEY: ${{ secrets.DEV_GCP_SA_KEY }}
