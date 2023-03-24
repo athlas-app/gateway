@@ -30,19 +30,32 @@ jobs:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
-  deploy-dev:
-    needs: build
-    uses: ./.github/workflows/deploy.yml
-    with:
-      ENV_NAME: DEV
-    secrets:
-      PROJECT_ID: ${{ secrets.DEV_PROJECT_ID }}
-      GCP_SA_KEY: ${{ secrets.DEV_GCP_SA_KEY }}
-  deploy-prod:
-    needs: deploy-dev
-    uses: ./.github/workflows/deploy.yml
-    with:
-      ENV_NAME: PROD
-    secrets:
-      PROJECT_ID: ${{ secrets.PROD_PROJECT_ID }}
-      GCP_SA_KEY: ${{ secrets.PROD_GCP_SA_KEY }}
+
+      # Build and deploy to dev
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.DEV_GCP_SA_KEY }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+            project_id: ${{ secrets.DEV_PROJECT_ID }}
+
+      - name: Build and push Docker image
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          gcloud auth configure-docker
+          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:env
+          docker push gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:dev
+
+      - name: Deploy to Google Cloud Run
+        run: |
+          gcloud run deploy gateway:dev \
+            --platform managed \
+            --region us-central1 \
+            --image gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:dev \
+            --allow-unauthenticated \
+            --port 8080 \
+            --set-env-vars GRPC_GO_LOG_SEVERITY_LEVEL=INFO
