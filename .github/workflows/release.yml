@@ -42,7 +42,7 @@ jobs:
     needs: deploy-dev
     uses: ./.github/workflows/deploy.yml
     with:
-      ENV: PROD
+      ENV_NAME: PROD
     secrets:
       PROJECT_ID: ${{ secrets.PROD_PROJECT_ID }}
       GCP_SA_KEY: ${{ secrets.PROD_GCP_SA_KEY }}

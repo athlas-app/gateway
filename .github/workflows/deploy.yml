@@ -3,7 +3,7 @@ name: Athlas Gateway - Deploy
 on:
   workflow_call:
     inputs:
-      ENV:
+      ENV_NAME:
         required: true
         type: string
     secrets:
@@ -15,7 +15,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.ENV }}
+    environment: ${{ inputs.ENV_NAME }}
     steps:
       # Build and deploy to dev
       - id: 'auth'
@@ -33,15 +33,15 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           gcloud auth configure-docker
-          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/${{ secrets.PROJECT_ID }}/gateway:${{ inputs.ENV }}
-          docker push gcr.io/${{ secrets.PROJECT_ID }}/gateway-${{ inputs.ENV }}
+          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/${{ secrets.PROJECT_ID }}/gateway:${{ inputs.ENV_NAME }}
+          docker push gcr.io/${{ secrets.PROJECT_ID }}/gateway-${{ inputs.ENV_NAME }}
 
       - name: Deploy to Google Cloud Run
         run: |
-          gcloud run deploy gateway-${{ inputs.ENV }} \
+          gcloud run deploy gateway-${{ inputs.ENV_NAME }} \
             --platform managed \
             --region us-central1 \
-            --image gcr.io/${{ secrets.PROJECT_ID }}/gateway:${{ inputs.ENV }} \
+            --image gcr.io/${{ secrets.PROJECT_ID }}/gateway:${{ inputs.ENV_NAME }} \
             --allow-unauthenticated \
             --port 8080 \
             --set-env-vars GRPC_GO_LOG_SEVERITY_LEVEL=INFO
