@@ -10,13 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        env:
-          - name: DEV
-            PROJECT_ID: ${{ secrets.DEV_PROJECT_ID }}
-            GCP_SA_KEY: ${{ secrets.DEV_GCP_SA_KEY }}
-          - name: PROD
-            PROJECT_ID: ${{ secrets.PROD_PROJECT_ID }}
-            GCP_SA_KEY: ${{ secrets.PROD_GCP_SA_KEY }}
+        include:
+          - environment: DEV
+            project_id: DEV_PROJECT_ID
+            gcp_sa_key: DEV_GCP_SA_KEY
+          - environment: PROD
+            project_id: PROD_PROJECT_ID
+            gcp_sa_key: PROD_GCP_SA_KEY
+    env:
+      ENV_NAME: ${{ matrix.environment }}
+      PROJECT_ID: ${{ secrets[matrix.project_id] }}
+      GCP_SA_KEY: ${{ secrets[matrix.gcp_sa_key] }}
     environment: ${{ matrix.env.name }}
     steps:
       - uses: shimataro/ssh-key-action@v2
@@ -45,30 +49,27 @@ jobs:
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          credentials_json: '$GCP_SA_KEY'
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-            project_id: ${{ matrix.env.PROJECT_ID }}
+            project_id: $PROJECT_ID
 
       - name: Build and push Docker image
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          GCP_PROJECT_ID: ${{ matrix.env.PROJECT_ID }}
         run: |
           gcloud auth configure-docker
-          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/$GCP_PROJECT_ID/gateway:${{ matrix.env.name }} .
-          docker push gcr.io/$GCP_PROJECT_ID/gateway-${{ matrix.env.name }}
+          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/$PROJECT_ID/gateway:$ENV_NAME
+          docker push gcr.io/$PROJECT_ID/gateway-$ENV_NAME
 
       - name: Deploy to Google Cloud Run
-        env:
-          GCP_PROJECT_ID: ${{ matrix.env.PROJECT_ID }}
         run: |
-          gcloud run deploy gateway-${{ matrix.env.name }} \
+          gcloud run deploy gateway-$ENV_NAME \
             --platform managed \
             --region us-central1 \
-            --image gcr.io/$GCP_PROJECT_ID/gateway:${{ matrix.env.name }} \
+            --image gcr.io/$PROJECT_ID/gateway:$ENV_NAME \
             --allow-unauthenticated \
             --port 8080 \
             --set-env-vars GRPC_GO_LOG_SEVERITY_LEVEL=INFO
