@@ -8,20 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - environment: DEV
-            project_id: DEV_PROJECT_ID
-            gcp_sa_key: DEV_GCP_SA_KEY
-          - environment: PROD
-            project_id: PROD_PROJECT_ID
-            gcp_sa_key: PROD_GCP_SA_KEY
-    env:
-      ENV_NAME: ${{ matrix.environment }}
-      PROJECT_ID: ${{ secrets[matrix.project_id] }}
-      GCP_SA_KEY: ${{ secrets[matrix.gcp_sa_key] }}
-    environment: ${{ matrix.env.name }}
     steps:
       - uses: shimataro/ssh-key-action@v2
         with:

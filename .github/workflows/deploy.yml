@@ -15,6 +15,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: $ENV
     steps:
       # Build and deploy to dev
       - id: 'auth'
@@ -32,15 +33,15 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           gcloud auth configure-docker
-          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/$PROJECT_ID/gateway:$ENV_NAME
-          docker push gcr.io/$PROJECT_ID/gateway-$ENV_NAME
+          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/$PROJECT_ID/gateway:$ENV
+          docker push gcr.io/$PROJECT_ID/gateway-$ENV
 
       - name: Deploy to Google Cloud Run
         run: |
-          gcloud run deploy gateway-$ENV_NAME \
+          gcloud run deploy gateway-$ENV \
             --platform managed \
             --region us-central1 \
-            --image gcr.io/$PROJECT_ID/gateway:$ENV_NAME \
+            --image gcr.io/$PROJECT_ID/gateway:$ENV \
             --allow-unauthenticated \
             --port 8080 \
             --set-env-vars GRPC_GO_LOG_SEVERITY_LEVEL=INFO
