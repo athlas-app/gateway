@@ -47,7 +47,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           gcloud auth configure-docker
-          docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:dev .
+          DOCKER_BUILDKIT=1 docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:dev .
           docker push gcr.io/${{ secrets.DEV_PROJECT_ID }}/gateway:dev
 
       - name: Deploy to Google Cloud Run
