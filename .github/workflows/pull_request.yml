@@ -30,6 +30,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: id_rsa
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      # Build and deploy to dev
+      - run: echo "${{ secrets.DEV_GCP_SA_KEY }}"
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.DEV_GCP_SA_KEY }}
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
