@@ -17,7 +17,7 @@ jobs:
           - name: PROD
             PROJECT_ID: ${{ secrets.PROD_PROJECT_ID }}
             GCP_SA_KEY: ${{ secrets.PROD_GCP_SA_KEY }}
-    environment: production
+    environment: ${{ matrix.env.name }}
     steps:
       - uses: shimataro/ssh-key-action@v2
         with:
