@@ -36,7 +36,7 @@ jobs:
         with:
             project_id: ${{ secrets.PROJECT_ID }}
 
-      - name: DEV - Build and push Docker image
+      - name: Build and push Docker image
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
