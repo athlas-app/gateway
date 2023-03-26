@@ -1,0 +1,45 @@
+name: Athlas Gateway - CI Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      GCP_SA_KEY:
+        required: true
+      PROJECT_ID:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      # Build and deploy container image
+      - name: Authenticate to GCP
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+            project_id: ${{ secrets.PROJECT_ID }}
+
+      - name: DEV - Build and push Docker image
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          gcloud auth configure-docker us-east4-docker.pkg.dev
+          DOCKER_BUILDKIT=1 docker build --build-arg SSH_PRIVATE_KEY="$SSH_PRIVATE_KEY" -t us-east4-docker.pkg.dev/${{ secrets.PROJECT_ID }}/gateway-repo/gateway-grpc .
+          docker push us-east4-docker.pkg.dev/${{ secrets.PROJECT_ID }}/gateway-repo/gateway-grpc
