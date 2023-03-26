@@ -3,7 +3,7 @@ Gateway server to interface between mobile apps and microservices
 
 ## Getting Started
 
-Something 
+This server serves as an API gateway between the Athlas Mobile Application and the various microservices that comprise our architecture.
 
 ## TODO:
 
