@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      # Build and deploy container image to dev
+      # Build and deploy container image
       - name: Authenticate to GCP
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
