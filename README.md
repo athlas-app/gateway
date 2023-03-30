@@ -7,5 +7,6 @@ This server serves as an API gateway between the Athlas Mobile Application and t
 
 ## TODO:
 
-- Add instructions here: https://go.dev/doc/faq#git_https
-- Add instructions on how to register new server
+[] Add instructions here: https://go.dev/doc/faq#git_https
+[] Add instructions on how to register new server
+[] Add instructions on how to set up GCP API Gateway
